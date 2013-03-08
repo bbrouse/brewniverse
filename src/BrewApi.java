@@ -18,7 +18,7 @@ public class BrewApi {
 	String apiKey = "XXX";
 	String apiBaseURL = "http://api.brewerydb.com/v2/";
 	
-	public ApiSearchResult searchBeersByName(String query, int pageNumber){
+	public void searchBeersByName(String query, int pageNumber){
 		BufferedReader rd = null;
 		StringBuilder response = null;
 		String apiEndPoint = apiBaseURL + "search?type=beer&key=" + apiKey + "&q=" + query + "&p=" + pageNumber;
@@ -33,7 +33,7 @@ public class BrewApi {
 			response = new StringBuilder();
 			String line = null;
 			while ((line = rd.readLine()) != null){
-				response.append(line + '\n');
+				response.append(line);
 			}
 			
 			request.disconnect();
@@ -48,44 +48,10 @@ public class BrewApi {
 			e.printStackTrace();
 		}
 		
-		
-		int numPages = pageNumberFromJson(response.toString());
-		int numResults = resultNumberFromJson(response.toString());
-		int currentPage = currentPageFromJson(response.toString());
-		Beer[] beers = beerListFromJson(response.toString(), numResults);
-		return new ApiSearchResult(beers, numResults, numPages, currentPage);
-	}
-	
-	private Beer[] beerListFromJson(String jsonString, int numBeers){
-		Beer[] beersToReturn = new Beer[numBeers];
-		JsonParser parser = new JsonParser();
-        JsonObject obj = (JsonObject)parser.parse(jsonString);
- 
-        JsonArray arr = obj.get("data").getAsJsonArray();
-        for(JsonElement b: arr){
-        	Beer beer = new Beer();
-        	beer.setId(b.get("id"));
-        }
-	}
-	
-	private int pageNumberFromJson(String jsonString){
-		JsonParser parser = new JsonParser();
-        JsonObject obj = (JsonObject)parser.parse(jsonString);
-        JsonElement id = obj.get("numberOfPages");
-        return Integer.parseInt(id.toString());
-	}
-	
-	private int currentPageFromJson(String jsonString){
-		JsonParser parser = new JsonParser();
-        JsonObject obj = (JsonObject)parser.parse(jsonString);
-        JsonElement id = obj.get("currentPage");
-        return Integer.parseInt(id.toString());
-	}
-	
-	private int resultNumberFromJson(String jsonString){
-		JsonParser parser = new JsonParser();
-        JsonObject obj = (JsonObject)parser.parse(jsonString);
-        JsonElement id = obj.get("totalResults");
-        return Integer.parseInt(id.toString());
+		System.out.println(response.toString().substring(1380, 1420));
+		System.out.println(response.toString().substring(1405, 1407));
+		Gson gson = new Gson();
+		SearchResult searchResult = gson.fromJson(response.toString(), SearchResult.class);
+		System.out.println(searchResult.data.get(0).srm);
 	}
 }
