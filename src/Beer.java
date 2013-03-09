@@ -8,7 +8,7 @@ public class Beer {
 	public String name;
 	public String description;
 	public float abv;
-	public int ibu;
+	public float ibu;
 	public String availablity;
 	public String isOrganic;
 	public int year;

@@ -21,7 +21,8 @@ public class BrewniverseMainUI {
 		//frame.setVisible(true);
 		
 		BrewApi brewApi = new BrewApi();
-		brewApi.searchBeersByName("yuengling", 1);
+		BeerPreference pref = new BeerPreference("temp", 0, 33, 0, 20, null, null);
+		brewApi.searchBeersByPreference(pref, 1);
 	}
 
 }
