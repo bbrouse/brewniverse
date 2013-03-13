@@ -24,7 +24,7 @@ import com.google.gson.JsonParser;
 
 public class BrewApi {
 	
-	String apiKey = "f442fc8ad69a83751de9a8acce9981f1";
+	String apiKey = "86fb5080c06b3f35b96ae64c1e66659f";
 	String apiBaseURL = "http://api.brewerydb.com/v2/";	
 	boolean DEBUG = true;
 	
