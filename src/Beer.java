@@ -9,10 +9,10 @@ public class Beer {
 	public String description;
 	public float abv;
 	public float ibu;
-	public String availablity;
+	public BeerAvailability available;
 	public String isOrganic;
 	public int year;
-	public Style style;
+	public BeerStyle style;
 	public Label labels;
 	public SrmValue srm;
 
@@ -29,10 +29,10 @@ public class Beer {
 	}
 	
 	public String getABVDescription(){
-		if (ibu >= 0 && ibu <= 6){
+		if (abv >= 0 && abv <= 6){
 			return "Low ABV";
 		}
-		else if(ibu >= 7 && ibu <= 13){
+		else if(abv >= 7 && abv <= 13){
 			return "Medium ABV";
 		}
 		else{

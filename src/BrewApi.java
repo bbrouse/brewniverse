@@ -1,11 +1,19 @@
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
+import java.util.Vector;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -16,18 +24,24 @@ import com.google.gson.JsonParser;
 
 public class BrewApi {
 	
-	String apiKey = "XXX";
+	String apiKey = "f442fc8ad69a83751de9a8acce9981f1";
 	String apiBaseURL = "http://api.brewerydb.com/v2/";	
+	boolean DEBUG = true;
 	
 	public SearchResult searchBeersByName(String query, int pageNumber){
-		String apiEndPoint = apiBaseURL + "search?type=beer&key=" + apiKey + "&q=" + query + "&p=" + pageNumber;
+		String apiEndPoint = apiBaseURL + "search?type=beer&key=" + apiKey + "&q=" + URLEncoder.encode(query) + "&p=" + pageNumber;
+		System.out.println("URL: " + apiEndPoint);
 		String jsonString = stringFromUrl(apiEndPoint);
+		System.out.println(jsonString);
 		Gson gson = new Gson();
-		return gson.fromJson(jsonString, SearchResult.class);
+		SearchResult result = gson.fromJson(jsonString, SearchResult.class);
+		result.query = query;
+		result.isPreferenceSearch = false;
+		return result;
 	}
 	
 	public SearchResult searchBeersByPreference(BeerPreference preference, int pageNumber){
-		String apiEndPoint = apiBaseURL + "beers?key=" + apiKey;
+		String apiEndPoint = apiBaseURL + "beers?key=" + apiKey + "&p=" + pageNumber;
 		
 		if (preference.hasAbvPreference()){
 			apiEndPoint = apiEndPoint.concat("&abv=" + preference.abvMin + "," + preference.abvMax);
@@ -41,18 +55,98 @@ public class BrewApi {
 		if (preference.hasSrmPreference()){
 			apiEndPoint = apiEndPoint.concat("&srmId=" + preference.srm.id);
 		}
+		System.out.println("URL: " + apiEndPoint);
 		
 		String jsonString = stringFromUrl(apiEndPoint);
 		Gson gson = new Gson();
-		return gson.fromJson(jsonString, SearchResult.class);
+		SearchResult result = gson.fromJson(jsonString, SearchResult.class);
+		result.preference = preference;
+		result.isPreferenceSearch = true;
+		return result;
 	}
 	
-	public List<Style> getAllStyles(){
+	public SearchResult getAdditionalResults(SearchResult previousResults){
+		if(previousResults.isPreferenceSearch){
+			return searchBeersByPreference(previousResults.preference, previousResults.currentPage+1);
+		}
+		else{
+			return searchBeersByName(previousResults.query, previousResults.currentPage+1);
+		}
+	}
+	
+	public List<Beer> importSavedBeers(){
+		String jsonString;
+		try {
+			jsonString = fromFile("saved_beers.json");
+		} catch (FileNotFoundException e) {
+			return new ArrayList<Beer>();
+		}
+		Gson gson = new Gson();
+		SearchResult result = gson.fromJson(jsonString, SearchResult.class);
+		return result.data;
+	}
+	
+	public void exportSavedBeers(List<Beer> savedBeers){
+		SearchResult tempSearchResult = new SearchResult();
+		tempSearchResult.data = savedBeers;
+		Gson gson = new Gson();
+		String json = gson.toJson(tempSearchResult);
+		toFile(json, "saved_beers.json");
+	}
+	
+	public Vector<BeerStyle> getAllStyles(){
+		String jsonString = null;
+		if(DEBUG){
+			try {
+				jsonString = fromFile("styles.json");
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+			Gson gson = new Gson();
+			StyleResults styles = gson.fromJson(jsonString, StyleResults.class);
+			return styles.data;
+		}
 		String apiEndPoint = apiBaseURL + "styles?key=" + apiKey;
-		String jsonString = stringFromUrl(apiEndPoint);
+		jsonString = stringFromUrl(apiEndPoint);
+		toFile(jsonString, "styles.json");
 		Gson gson = new Gson();
 		StyleResults styles = gson.fromJson(jsonString, StyleResults.class);
 		return styles.data;
+	}
+	
+	public Vector<SrmValue> getAllSrmValues(){
+		String jsonString = null;
+		if(DEBUG){
+			try {
+				jsonString = fromFile("srm_values.json");
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+			Gson gson = new Gson();
+			SrmResults srms = gson.fromJson(jsonString, SrmResults.class);
+			return srms.data;
+		}
+		String apiEndPoint = apiBaseURL + "menu/srm?key=" + apiKey;
+		jsonString = stringFromUrl(apiEndPoint);
+		toFile(jsonString, "srm_values.json");
+		Gson gson = new Gson();
+		SrmResults srms = gson.fromJson(jsonString, SrmResults.class);
+		return srms.data;
+	}
+	
+	private void toFile(String text, String fileName){
+		try {
+			FileWriter writer = new FileWriter(fileName);
+			writer.write(text);
+			writer.close();
+	 
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private String fromFile(String fileName) throws FileNotFoundException{
+		return new Scanner(new File(fileName)).useDelimiter("\\Z").next();
 	}
 	
 	private String stringFromUrl(String urlString){

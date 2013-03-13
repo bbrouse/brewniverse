@@ -3,9 +3,9 @@ public class BeerPreference {
 	public String name;
 	public float ibuMin, ibuMax, abvMin, abvMax;
 	public SrmValue srm;
-	public Style style;
+	public BeerStyle style;
 	
-	public BeerPreference(String inName, int inIbuMin, int inIbuMax, int inAbvMin, int inAbvMax, SrmValue inSrm, Style inStyle){
+	public BeerPreference(String inName, int inIbuMin, int inIbuMax, int inAbvMin, int inAbvMax, SrmValue inSrm, BeerStyle inStyle){
 		name = inName;
 		if(inIbuMin < 0 || inIbuMax < 0){
 			ibuMin = -1;

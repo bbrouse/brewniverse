@@ -1,6 +1,6 @@
 
-public class Style {
+public class BeerAvailability {
+	public String id;
 	public String name;
 	public String description;
-	public int id;
 }
