@@ -169,6 +169,9 @@ public class BrewniverseMainUI {
 		emptyListPanel.setBackground(COLORSCHEME4);
 		c.gridx = 0; c.gridy = 0;
 		emptyListPanel.add(new JLabel("No Beers to Display"), c);
+		c.gridx = 0; c.gridy = 1;
+		java.net.URL bottlecapIcon = BrewniverseMainUI.class.getResource("images/bottle_caps.png");
+		emptyListPanel.add(new JLabel(new ImageIcon(bottlecapIcon)), c);
 		
 		beerListPane = new BeerListPanel(new ArrayList<Beer>());
 		beerInfoPane = new BeerInfoPanel(new Beer());
@@ -191,11 +194,11 @@ public class BrewniverseMainUI {
 				nameSearchPane.setVisible(false);
 				searchResults = brewApi.searchBeersByName(nameSearchTextField.getText(), 1);
 				if(searchResults.data.size() == 0){
-					statusMessage("Found zero results based on preference");
+					statusMessage("Found zero results for \"" + nameSearchTextField.getText() + "\"");
 					beerCardLayout.show(rightCardPanes, EMPTYLISTPANEL);
 				}
 				else{
-					statusMessage("Found " + searchResults.totalResults + " results based on perefernce");
+					statusMessage("Found " + searchResults.totalResults + " results for \"" + nameSearchTextField.getText() + "\"");
 					beerListPane.replaceBeers(searchResults.data);
 					beerCardLayout.show(rightCardPanes, BEERLISTPANEL);
 				}
@@ -320,11 +323,10 @@ public class BrewniverseMainUI {
 				searchResults = brewApi.searchBeersByPreference(beerPreference, 1);
 				if(searchResults.data.size() == 0){
 					statusMessage("Found zero results for " + nameSearchTextField.getText());
-
 					beerCardLayout.show(rightCardPanes, EMPTYLISTPANEL);
 				}
 				else{
-					statusMessage("Found " + searchResults.totalResults + " results for " + nameSearchTextField.getText());
+					statusMessage("Found " + searchResults.totalResults + " from personal preference");
 					beerListPane.replaceBeers(searchResults.data);
 					beerCardLayout.show(rightCardPanes, BEERLISTPANEL);
 				}
@@ -472,7 +474,6 @@ public class BrewniverseMainUI {
 			        int extent = scrollBar.getModel().getExtent();
 			        if((scrollBar.getValue() + extent) == (scrollBar.getMaximum())){
 			        	if(searchResults != null && searchResults.hasPagesLeft()){
-			        		System.out.println("Searching now: " + searchResults.hasPagesLeft() + ", " +  searchResults.currentPage + ", " + searchResults.numberOfPages);
 			        		searchResults = brewApi.getAdditionalResults(searchResults);
 			        		addBeers(searchResults.data);
 			        	}
