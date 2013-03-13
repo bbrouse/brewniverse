@@ -108,7 +108,7 @@ public class BrewniverseMainUI {
 		
 		nameSeachShowButton = new JButton("<html><body><center>Search Beer<br>by Name</center></body></html>");
 		nameSeachShowButton.setActionCommand("name search");
-		nameSeachShowButton.setToolTipText("");
+		nameSeachShowButton.setToolTipText("Search for a beer by name");
 		nameSeachShowButton.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {
 				if(nameSearchPane.isVisible()){
@@ -123,6 +123,7 @@ public class BrewniverseMainUI {
 		
 		preferenceSearchShowButton = new JButton("<html><body><center>Search Beer<br>by Preference</center></body></html>");
 		preferenceSearchShowButton.setActionCommand("preference search");
+		preferenceSearchShowButton.setToolTipText("Search for a beer based on personal preferences");
 		preferenceSearchShowButton.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {
 				if(preferenceSearchPane.isVisible()){
@@ -138,6 +139,7 @@ public class BrewniverseMainUI {
 		
 		viewSavedButton = new JButton("<html><body><center>View<br>Saved Beers</center></body></html>");
 		viewSavedButton.setActionCommand("view saved");
+		viewSavedButton.setToolTipText("View all of your saved beers");
 		viewSavedButton.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {
 				if(savedBeers.size() == 0){
@@ -187,6 +189,11 @@ public class BrewniverseMainUI {
 	    nameSearchPane.setVisible(false);
 	    nameSearchPane.setBackground(COLORSCHEME5);
 	    nameSearchTextField = new JTextField("",20);
+	    nameSearchTextField.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {
+				nameSearchButton.doClick();
+			}
+		});
 	    nameSearchPane.add(nameSearchTextField);
 	    nameSearchButton = new JButton("Search");
 	    nameSearchButton.addActionListener(new ActionListener(){
@@ -220,10 +227,12 @@ public class BrewniverseMainUI {
 	    preferenceSearchPane.setBackground(COLORSCHEME5);
 	    
 	    JPanel bitternessSearchPane = new JPanel(new GridBagLayout());
+	    bitternessSearchPane.setToolTipText("Adjust your search based on your preference of bitterness");
 	    bitternessSearchPane.setBorder(BorderFactory.createTitledBorder("Bitterness"));
 	    bitternessSearchPane.setBackground(COLORSCHEME5);
 	    enableBitternessBox = new JCheckBox();
 	    enableBitternessBox.setActionCommand("bitterness");
+	    enableBitternessBox.setToolTipText("Check to include bitterness with your search criteria");
 	    enableBitternessBox.setSelected(true);
 	    enableBitternessBox.addItemListener(new optionCheckBoxListener());
 	    bitternessOptionSlider = new JSlider(JSlider.HORIZONTAL, 0, 100, 20);
@@ -235,6 +244,7 @@ public class BrewniverseMainUI {
 	    });
 	    ibuCounter = new JTextField("20 IBUs",5);
 	    ibuCounter.setEditable(false);
+	    ibuCounter.setToolTipText("Bitterness is measuer in IBUs (international bitterness units). The higher the IBU, the more bitter the beer");
 	    
 	    c.gridx=0; c.gridy=0; c.insets=new Insets(0,0,0,0); c.gridwidth=1; c.anchor=c.CENTER;
 	    bitternessSearchPane.add(enableBitternessBox,c);
@@ -246,10 +256,12 @@ public class BrewniverseMainUI {
 	    preferenceSearchPane.add(bitternessSearchPane,c);
 	    
 	    JPanel abvSearchPane = new JPanel(new GridBagLayout());
+	    abvSearchPane.setToolTipText("Adjust your search based on your preference of alcohol by volume");
 	    abvSearchPane.setBorder(BorderFactory.createTitledBorder("Alcohol by Volume"));
 	    abvSearchPane.setBackground(COLORSCHEME5);
 	    enableAbvBox = new JCheckBox();
 	    enableAbvBox.setActionCommand("abv");
+	    enableAbvBox.setToolTipText("Check to include alcohol by volume with your search criteria");
 	    enableAbvBox.setSelected(true);
 	    enableAbvBox.addItemListener(new optionCheckBoxListener());
 	    abvOptionSlider = new JSlider(JSlider.HORIZONTAL, 0, 25, 4);
@@ -261,6 +273,7 @@ public class BrewniverseMainUI {
 	    });
 	    abvCounter = new JTextField("4 ABV",4);
 	    abvCounter.setEditable(false);
+	    abvCounter.setToolTipText("Alcohol by Volume (ABV) is the amount of alcohol present in the beer.  The higher the ABV, the higher alcohol content");
 	    
 	    c.gridx=0; c.gridy=0; c.gridwidth=1; c.insets=new Insets(0,0,0,0);
 	    abvSearchPane.add(enableAbvBox,c);
@@ -272,10 +285,12 @@ public class BrewniverseMainUI {
 	    preferenceSearchPane.add(abvSearchPane,c);
 	    
 	    JPanel styleSearchPane = new JPanel(new GridBagLayout());
+	    styleSearchPane.setToolTipText("Adjust your search based on your preference of beer style");
 	    styleSearchPane.setBorder(BorderFactory.createTitledBorder("Style"));
 	    styleSearchPane.setBackground(COLORSCHEME5);
 	    enableStyleBox = new JCheckBox();
 	    enableStyleBox.setActionCommand("style");
+	    enableStyleBox.setToolTipText("Check to include beer style with your search criteria");
 	    enableStyleBox.setSelected(true);
 	    enableStyleBox.addItemListener(new optionCheckBoxListener());
 	    styleOptionComboBox = new JComboBox(brewApi.getAllStyles());
@@ -288,10 +303,12 @@ public class BrewniverseMainUI {
 	    preferenceSearchPane.add(styleSearchPane,c);
 	    
 	    JPanel srmSearchPane = new JPanel(new GridBagLayout());
+	    srmSearchPane.setToolTipText("Adjust your search based on your preference of beer color");
 	    srmSearchPane.setBorder(BorderFactory.createTitledBorder("Color"));
 	    srmSearchPane.setBackground(COLORSCHEME5);
 	    enableSrmBox = new JCheckBox();
 	    enableSrmBox.setActionCommand("color");
+	    enableSrmBox.setToolTipText("Check to include beer color with your search criteria");
 	    enableSrmBox.setSelected(true);
 	    enableSrmBox.addItemListener(new optionCheckBoxListener());
 	    srmOptionComboBox = new JComboBox(brewApi.getAllSrmValues());
@@ -322,7 +339,7 @@ public class BrewniverseMainUI {
 				BeerPreference beerPreference = getBeerPreferenceFromFields();
 				searchResults = brewApi.searchBeersByPreference(beerPreference, 1);
 				if(searchResults.data.size() == 0){
-					statusMessage("Found zero results for " + nameSearchTextField.getText());
+					statusMessage("Found zero results for personal preference");
 					beerCardLayout.show(rightCardPanes, EMPTYLISTPANEL);
 				}
 				else{
@@ -521,6 +538,41 @@ public class BrewniverseMainUI {
 						e.printStackTrace();
 					}
 				}
+				
+				java.net.URL removeSaveURL = BrewniverseMainUI.class.getResource("images/remove.png");
+				java.net.URL addSaveURL = BrewniverseMainUI.class.getResource("images/add.png");
+				JButton toggleSavedBeerButton;
+				if(isBeerSaved(b)){
+					toggleSavedBeerButton = new JButton(new ImageIcon(removeSaveURL));
+					toggleSavedBeerButton.setToolTipText("Remove beer from saved list");
+				}
+				else{
+					toggleSavedBeerButton = new JButton(new ImageIcon(addSaveURL));
+					toggleSavedBeerButton.setToolTipText("Add beer to saved list");
+				}
+				toggleSavedBeerButton.setActionCommand(b.id);
+				toggleSavedBeerButton.addActionListener(new ActionListener(){
+					public void actionPerformed(ActionEvent e) {
+						Beer beer = getBeerFromListById(e.getActionCommand());
+						if(isBeerSaved(beer)){
+							removeSavedBeer(beer);
+						}
+						else{
+							saveBeer(beer);
+						}
+						removeStatusMessage();
+						searchResults = null;
+						beerListPane.replaceBeers(savedBeers);
+						beerCardLayout.show(rightCardPanes, EMPTYLISTPANEL);
+						beerCardLayout.show(rightCardPanes, BEERLISTPANEL);
+						statusMessage("Currently Viewing: Saved Beers");
+					}
+				});
+				listConstraint = createCorrectGBC(1,0);
+				listConstraint.anchor = listConstraint.EAST;
+				listConstraint.insets = new Insets(0,0,0,105);
+				beerPanel.add(toggleSavedBeerButton, listConstraint);
+				
 				listConstraint = createCorrectGBC(1,0);
 				moreInfoButton.setPreferredSize(moreInfoButton.getPreferredSize());
 				moreInfoButton.setActionCommand(b.id);
@@ -763,5 +815,4 @@ public class BrewniverseMainUI {
 		frame.pack();
 		frame.setVisible(true);
 	}
-
 }

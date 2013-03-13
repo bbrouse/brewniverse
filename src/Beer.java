@@ -29,10 +29,10 @@ public class Beer {
 	}
 	
 	public String getABVDescription(){
-		if (abv >= 0 && abv <= 4){
+		if (abv >= 0 && abv <= 3){
 			return "Low ABV";
 		}
-		else if(abv >= 5 && abv <= 11){
+		else if(abv >= 4 && abv <= 6){
 			return "Average ABV";
 		}
 		else{
