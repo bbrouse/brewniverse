@@ -1,3 +1,8 @@
+/*
+ * Ben Brouse
+ * bjb85@drexel.edu
+ * CS338:GUI, Final Project (Brewniverse)
+ */
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -5,7 +10,6 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -16,17 +20,17 @@ import java.util.Scanner;
 import java.util.Vector;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
+/*
+ * The method names in this class are pretty self explanatory.  The class makes
+ * a REST api call to BreweryDB for a json string of data.  Then the GSON library
+ * parses that json into the appropriate object type.
+ */
 public class BrewApi {
 	
 	String apiKey = "86fb5080c06b3f35b96ae64c1e66659f";
 	String apiBaseURL = "http://api.brewerydb.com/v2/";	
-	boolean DEBUG = true;
+	boolean DEBUG = false; //used while testing to make sure I didn't make superfluous API calls
 	
 	public SearchResult searchBeersByName(String query, int pageNumber){
 		String apiEndPoint = apiBaseURL + "search?type=beer&key=" + apiKey + "&q=" + URLEncoder.encode(query) + "&p=" + pageNumber;
@@ -169,11 +173,9 @@ public class BrewApi {
 			rd.close();
 			
 		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return response.toString();

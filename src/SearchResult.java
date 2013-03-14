@@ -1,3 +1,9 @@
+/*
+ * Ben Brouse
+ * bjb85@drexel.edu
+ * CS338:GUI, Final Project (Brewniverse)
+ */
+
 import java.util.ArrayList;
 import java.util.List;
 

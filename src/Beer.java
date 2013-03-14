@@ -1,6 +1,8 @@
-import java.util.ArrayList;
-import java.util.List;
-
+/*
+ * Ben Brouse
+ * bjb85@drexel.edu
+ * CS338:GUI, Final Project (Brewniverse)
+ */
 
 public class Beer {
 	

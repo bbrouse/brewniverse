@@ -1,14 +1,15 @@
-import java.awt.BasicStroke;
+/*
+ * Ben Brouse
+ * bjb85@drexel.edu
+ * CS338:GUI, Final Project (Brewniverse)
+ */
+
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dialog.ModalityType;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -26,24 +27,19 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.ComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
 import javax.swing.JSlider;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -52,47 +48,61 @@ import javax.swing.event.ChangeListener;
 
 
 public class BrewniverseMainUI {
+	//All main panes used in the gui
 	private static JFrame frame;
-	private JPanel leftMainPane, rightMainPane, mainPane, rightCardPanes, nameSearchPane, preferenceSearchPane, emptyListPanel, communicationPane;
-	private BeerListPanel beerListPane;
-	private BeerInfoPanel beerInfoPane;
+	private JPanel leftMainPane, rightMainPane, mainPane, rightCardPanes;
+	private JPanel nameSearchPane, preferenceSearchPane, emptyListPanel, communicationPane;
+	private JPanel beerInfoHolder;
+	private JScrollPane scrollPane;
+	private CardLayout beerCardLayout;
+	
+	//Ass swing elements used for I/O between gui and user
 	private JButton nameSeachShowButton, preferenceSearchShowButton, viewSavedButton;
 	private JButton nameSearchCancelButton, nameSearchButton, preferenceSearchButton, preferenceSearchCancelButton;
-	private JTextField nameSearchTextField;
+	private JTextField ibuCounter, abvCounter, nameSearchTextField;
+	private JSlider bitternessOptionSlider, abvOptionSlider;
+	private JComboBox styleOptionComboBox, srmOptionComboBox;
+	private JCheckBox enableBitternessBox, enableAbvBox, enableStyleBox, enableSrmBox;
+	
+	private JLabel communicationLabel;
+	
+	//Custom panes used to show beer list as well as beer description
+	private BeerListPanel beerListPane;
+	private BeerInfoPanel beerInfoPane;
+	
+	//Beers currently shown in the UI
 	private List<Beer> beers = new ArrayList<Beer>();
 	private List<Beer> savedBeers;
-	private JScrollPane scrollPane;
-	private JPanel beerInfoHolder;
-	private CardLayout beerCardLayout;
+	
+	//Utility constructs to get and hold data from the BreweryDB api
 	private SearchResult searchResults;
 	private BrewApi brewApi;
 	
+	//Constant strings used in switching the card pane to different panes
 	final static String BEERINFOPANEL = "Panel with Beer Info";
 	final static String BEERLISTPANEL = "Panel with Beer List";
 	final static String EMPTYLISTPANEL = "Panel with Empty List";
 	
+	//In an attempt to stick with a color pallette, kept colors constant
+	//Pallette was generated at http://colorschemedesigner.com/
 	final static Color COLORSCHEME1 = new Color(0x743311);
 	final static Color COLORSCHEME2 = new Color(0xD9A184);
 	final static Color COLORSCHEME3 = new Color(0xD98D65);
 	final static Color COLORSCHEME4 = new Color(0xB25F33);
 	final static Color COLORSCHEME5 = new Color(0x85573E);
 	
+	//Constant insets used in arranging items in the Beer list pane
 	private final Insets WEST_INSETS = new Insets(10, 0, 10, 10);
 	private final Insets EAST_INSETS = new Insets(10, 10, 10, 0);
 	
-	private JSlider bitternessOptionSlider, abvOptionSlider;
-	private JComboBox styleOptionComboBox, srmOptionComboBox;
-	private JCheckBox enableBitternessBox, enableAbvBox, enableStyleBox, enableSrmBox;
-	private JTextField ibuCounter, abvCounter;
-	
-	private JLabel communicationLabel;
-	
+	//Here's where all the magic happens (where all the main components are generated)
 	public Component initComponents(){
 		frame.addWindowListener(listener);
 		brewApi = new BrewApi();
 		searchResults = new SearchResult();
-		savedBeers = brewApi.importSavedBeers();
+		savedBeers = brewApi.importSavedBeers(); //get all saved beers from file, if there is one
 		
+		//The left pane is the "control bar" containing the logo and three buttons (search options and view saved)
 		leftMainPane = new JPanel();
 		GridBagConstraints c = new GridBagConstraints();
 		leftMainPane.setLayout(new GridBagLayout());
@@ -102,10 +112,11 @@ public class BrewniverseMainUI {
 		leftMainPane.setBorder(BorderFactory.createLineBorder(Color.black,1));
 		leftMainPane.setBackground(COLORSCHEME1);
 		
-		c.gridx=0; c.gridy=0; c.anchor=c.NORTHWEST; c.insets = new Insets(10,5,10,5);
+		c.gridx=0; c.gridy=0; c.anchor=GridBagConstraints.NORTHWEST; c.insets = new Insets(10,5,10,5);
 		java.net.URL brewniverseIcon = BrewniverseMainUI.class.getResource("images/brewniverse_logo.png");
 		leftMainPane.add(new JLabel(new ImageIcon(brewniverseIcon)),c);
 		
+		//Create the button that shows the name search bar
 		nameSeachShowButton = new JButton("<html><body><center>Search Beer<br>by Name</center></body></html>");
 		nameSeachShowButton.setActionCommand("name search");
 		nameSeachShowButton.setToolTipText("Search for a beer by name");
@@ -121,6 +132,7 @@ public class BrewniverseMainUI {
 			}
 		});
 		
+		//Create the button that shows the preference search bar
 		preferenceSearchShowButton = new JButton("<html><body><center>Search Beer<br>by Preference</center></body></html>");
 		preferenceSearchShowButton.setActionCommand("preference search");
 		preferenceSearchShowButton.setToolTipText("Search for a beer based on personal preferences");
@@ -135,8 +147,8 @@ public class BrewniverseMainUI {
 				}
 			}
 		});
-		preferenceSearchShowButton.setToolTipText("");
 		
+		//Create the button that brings up the list of saved beers
 		viewSavedButton = new JButton("<html><body><center>View<br>Saved Beers</center></body></html>");
 		viewSavedButton.setActionCommand("view saved");
 		viewSavedButton.setToolTipText("View all of your saved beers");
@@ -157,16 +169,16 @@ public class BrewniverseMainUI {
 				}
 			}
 		});
-		viewSavedButton.setToolTipText("");
 		
-		
-		c.gridx = 0; c.gridy = 1; c.insets = new Insets(0,0,10,0); c.anchor = c.SOUTH;
+		//Arrange the three main buttons into the left main pane
+		c.gridx = 0; c.gridy = 1; c.insets = new Insets(0,0,10,0); c.anchor = GridBagConstraints.SOUTH;
 		leftMainPane.add(viewSavedButton, c);
 		c.gridx = 0; c.gridy = 2; c.insets = new Insets(0,0,0,0);
 		leftMainPane.add(nameSeachShowButton,c);
 		c.gridx = 0; c.gridy = 3; c.insets = new Insets(10,0,0,0);
 		leftMainPane.add(preferenceSearchShowButton,c);
 		
+		//Create the pane used when there are no beer results to display
 		emptyListPanel = new JPanel(new GridBagLayout());
 		emptyListPanel.setBackground(COLORSCHEME4);
 		c.gridx = 0; c.gridy = 0;
@@ -175,15 +187,24 @@ public class BrewniverseMainUI {
 		java.net.URL bottlecapIcon = BrewniverseMainUI.class.getResource("images/bottle_caps.png");
 		emptyListPanel.add(new JLabel(new ImageIcon(bottlecapIcon)), c);
 		
+		//Initialize the two main screens- beer list and beer info panes
 		beerListPane = new BeerListPanel(new ArrayList<Beer>());
 		beerInfoPane = new BeerInfoPanel(new Beer());
+		
+		//Card panes hold the three main views that take up the changing main pane (empty, list, info)
 		rightCardPanes = new JPanel(new CardLayout());
 		rightCardPanes.add(beerListPane, BEERLISTPANEL);
 		rightCardPanes.add(beerInfoPane, BEERINFOPANEL);
 		rightCardPanes.add(emptyListPanel, EMPTYLISTPANEL);
 		beerCardLayout = (CardLayout)(rightCardPanes.getLayout());
-	    beerCardLayout.show(rightCardPanes, EMPTYLISTPANEL);
+	    beerCardLayout.show(rightCardPanes, EMPTYLISTPANEL); //initially set to empty screen on launch
 	    
+	    /*
+	     * Create the name search pane that holds a textbox (for the query string), a
+	     * search button, as well as a cancel button.  The cancel button hides the search
+	     * bar.  In addition, the enter key canbe sued to activate the search rather than
+	     * pressing the search button.
+	     */
 	    nameSearchPane = new JPanel();
 	    nameSearchPane.setBorder(BorderFactory.createLineBorder(Color.black,1));
 	    nameSearchPane.setVisible(false);
@@ -220,12 +241,20 @@ public class BrewniverseMainUI {
 		});
 	    nameSearchPane.add(nameSearchCancelButton);
 	    
+	    /*
+	     * Here starts the process of constructing the preference search bar.  This bar holds
+	     * four different search options, each in their own pane.  The bitterness option has a checkbox,
+	     * slider, and textbox.  The ABV option has the same constructs. The style option has a
+	     * combobox and a checkbox, and the color option has the same.  The combobox for color
+	     * uses a custom renderer so that colors can be chosen rather than text.
+	     */
 	    preferenceSearchPane = new JPanel();
 	    preferenceSearchPane.setLayout(new GridBagLayout());
 	    preferenceSearchPane.setBorder(BorderFactory.createLineBorder(Color.black,1));
 	    preferenceSearchPane.setVisible(false);
 	    preferenceSearchPane.setBackground(COLORSCHEME5);
 	    
+	    //Bitterness option
 	    JPanel bitternessSearchPane = new JPanel(new GridBagLayout());
 	    bitternessSearchPane.setToolTipText("Adjust your search based on your preference of bitterness");
 	    bitternessSearchPane.setBorder(BorderFactory.createTitledBorder("Bitterness"));
@@ -246,7 +275,7 @@ public class BrewniverseMainUI {
 	    ibuCounter.setEditable(false);
 	    ibuCounter.setToolTipText("Bitterness is measuer in IBUs (international bitterness units). The higher the IBU, the more bitter the beer");
 	    
-	    c.gridx=0; c.gridy=0; c.insets=new Insets(0,0,0,0); c.gridwidth=1; c.anchor=c.CENTER;
+	    c.gridx=0; c.gridy=0; c.insets=new Insets(0,0,0,0); c.gridwidth=1; c.anchor=GridBagConstraints.CENTER;
 	    bitternessSearchPane.add(enableBitternessBox,c);
 	    c.gridx=1; c.gridy=0;
 	    bitternessSearchPane.add(bitternessOptionSlider,c);
@@ -255,6 +284,7 @@ public class BrewniverseMainUI {
 	    c.gridx=0; c.gridy=0; c.gridwidth=3;
 	    preferenceSearchPane.add(bitternessSearchPane,c);
 	    
+	    //ABV option
 	    JPanel abvSearchPane = new JPanel(new GridBagLayout());
 	    abvSearchPane.setToolTipText("Adjust your search based on your preference of alcohol by volume");
 	    abvSearchPane.setBorder(BorderFactory.createTitledBorder("Alcohol by Volume"));
@@ -284,6 +314,7 @@ public class BrewniverseMainUI {
 	    c.gridx=0; c.gridy=1; c.gridwidth=3;
 	    preferenceSearchPane.add(abvSearchPane,c);
 	    
+	    //Beer style option
 	    JPanel styleSearchPane = new JPanel(new GridBagLayout());
 	    styleSearchPane.setToolTipText("Adjust your search based on your preference of beer style");
 	    styleSearchPane.setBorder(BorderFactory.createTitledBorder("Style"));
@@ -302,6 +333,7 @@ public class BrewniverseMainUI {
 	    c.gridx=0; c.gridy=2;c.gridwidth=2;
 	    preferenceSearchPane.add(styleSearchPane,c);
 	    
+	    //Beer color option (with custom renderer in combobox
 	    JPanel srmSearchPane = new JPanel(new GridBagLayout());
 	    srmSearchPane.setToolTipText("Adjust your search based on your preference of beer color");
 	    srmSearchPane.setBorder(BorderFactory.createTitledBorder("Color"));
@@ -330,6 +362,7 @@ public class BrewniverseMainUI {
 	    c.gridx=2; c.gridy=2;
 	    preferenceSearchPane.add(srmSearchPane,c);
 	    
+	    //Search and cancel buttons in the preference search bar
 	    JPanel preferenceButtonPane = new JPanel(new GridBagLayout());
 	    preferenceButtonPane.setBackground(COLORSCHEME5);
 	    preferenceSearchButton = new JButton("Search");
@@ -365,6 +398,10 @@ public class BrewniverseMainUI {
 	    preferenceSearchPane.add(preferenceButtonPane,c);
 	    c.gridwidth=1;
 	    
+	    /*
+	     * This pane sits at the bottom of the main panes and sends feedback
+	     * to the user (when a search is complete, what screen they're in, etc.
+	     */
 	    communicationPane = new JPanel();
 	    communicationPane.setBorder(BorderFactory.createLineBorder(Color.black,1));
 	    communicationPane.setVisible(false);
@@ -373,6 +410,7 @@ public class BrewniverseMainUI {
 	    communicationLabel.setForeground(Color.white);
 	    communicationPane.add(communicationLabel);
 	    
+	    //Add all main panes to the right main pane
 	    rightMainPane = new JPanel();
 	    rightMainPane.setLayout(new BoxLayout(rightMainPane, BoxLayout.Y_AXIS));
 	    rightMainPane.setBorder(BorderFactory.createLineBorder(Color.black,1));
@@ -381,6 +419,7 @@ public class BrewniverseMainUI {
 		rightMainPane.add(rightCardPanes);
 		rightMainPane.add(communicationPane);
 		
+		//Consruct the main pane using the left and right portions
 		mainPane = new JPanel();
 		mainPane.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
 		mainPane.setLayout(new BoxLayout(mainPane, BoxLayout.X_AXIS));
@@ -390,13 +429,20 @@ public class BrewniverseMainUI {
 		return mainPane;
 	}
 	
+	/*
+	 * This method is used to extract a BeerPreference object from each of the
+	 * fields in the preference search bar
+	 */
 	public BeerPreference getBeerPreferenceFromFields(){
+		//Negative values used for when this option was not used
 		int ibuMin = -1;
 		int ibuMax = -1;
 		int abvMin = -1;
 		int abvMax = -1;
 		BeerStyle style = null;
 		SrmValue srm = null;
+		
+		//If they used bitterness, get the right range of IBUs
 		if(bitternessOptionSlider.isEnabled()){
 			int ibuValue = bitternessOptionSlider.getValue();
 			if(ibuValue > 5 && ibuValue < 95){
@@ -413,6 +459,7 @@ public class BrewniverseMainUI {
 			}
 		}
 		
+		//If they used ABV, get the right range of ABV
 		if(abvOptionSlider.isEnabled()){
 			int abvValue = abvOptionSlider.getValue();
 			if(abvValue > 5 && abvValue < 95){
@@ -429,17 +476,23 @@ public class BrewniverseMainUI {
 			}
 		}
 		
+		//If style was used, grab the BeerStyle object
 		if(styleOptionComboBox.isEnabled()){
 			style = (BeerStyle) styleOptionComboBox.getSelectedItem();
 		}
 		
+		//If color was used, grab the SrmValue object
 		if(srmOptionComboBox.isEnabled()){
 			srm = (SrmValue) srmOptionComboBox.getSelectedItem();
 		}
 		return new BeerPreference("", ibuMin, ibuMax, abvMin, abvMax, srm, style);
 	}
 	
+	//Custom combobox renderer to show color blocks instead of simply text
 	public class SrmComboBoxRenderer extends DefaultListCellRenderer{
+		private static final long serialVersionUID = 1L;
+		
+		//Use the hex value from within each SrmValue to provide the color
 		public Component getListCellRendererComponent(JList list,Object value,int index,boolean isSelected,boolean cellHasFocus){
 			JLabel lbl = (JLabel)super.getListCellRendererComponent(list,value,index,isSelected,cellHasFocus);
 			super.setBackground(Color.decode("0x" + ((SrmValue)value).hex));
@@ -448,6 +501,7 @@ public class BrewniverseMainUI {
 		}
 	}
 	
+	//Listener enable and disable preference options with actions of the checkboxes
 	public class optionCheckBoxListener implements ItemListener{
 		public void itemStateChanged(ItemEvent event) {
 			JCheckBox item = (JCheckBox)event.getItem();
@@ -466,8 +520,16 @@ public class BrewniverseMainUI {
 		}
 	}
 	
+	/*
+	 * This pane type is used to display the list of beers found in a search. It constructs
+	 * a pane for each beer and displays that beer's label, as well as a button to show
+	 * more information, and a button to add or remove from saved beers. This list is held in a 
+	 * scroll pane so it can hold a large number of beers.
+	 */
 	public class BeerListPanel extends JPanel{
 		
+		private static final long serialVersionUID = 1L;
+
 		public BeerListPanel(List<Beer> inBeerList){
 			super();
 			setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -478,13 +540,18 @@ public class BrewniverseMainUI {
 			beerInfoHolder.setLayout(new GridBagLayout());
 			beerInfoHolder.setMaximumSize(new Dimension(999999,70));
 			beerInfoHolder.setMinimumSize(new Dimension(100,70));
-			refreshBeerPanels();
+			refreshBeerPanels();//get beers into the list
 
 			scrollPane = new JScrollPane(beerInfoHolder);
 			scrollPane.setViewportView(beerInfoHolder);
 			scrollPane.setBackground(COLORSCHEME4);
 			beerInfoHolder.setAutoscrolls(true);
 			scrollPane.getVerticalScrollBar().setUnitIncrement(10);
+			
+			/*
+			 * This listener checks to see if the scroll bar is at the bottom of the page. If so,
+			 * then the next page of reaults will automatically be added to the end of the list.
+			 */
 			scrollPane.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener(){
 				public void adjustmentValueChanged(AdjustmentEvent event) {
 					JScrollBar scrollBar = (JScrollBar) event.getAdjustable();
@@ -515,9 +582,11 @@ public class BrewniverseMainUI {
 			beerInfoHolder.removeAll();
 			GridBagConstraints listConstraint = createCorrectGBC(0,0);
 			GridBagConstraints panelConstraint = new GridBagConstraints();
-			panelConstraint.fill = panelConstraint.BOTH;
-			panelConstraint.anchor = panelConstraint.NORTH;
+			panelConstraint.fill = GridBagConstraints.BOTH;
+			panelConstraint.anchor = GridBagConstraints.NORTH;
 			panelConstraint.weightx = 1.0; panelConstraint.weighty = 1.0;
+			
+			//Go through each beer that came from the api and add it to the list in its own pane
 			for(Beer b: beers){
 				JPanel beerPanel = new JPanel(new GridBagLayout());
 				beerPanel.setMaximumSize(new Dimension(999999,70));
@@ -526,6 +595,8 @@ public class BrewniverseMainUI {
 				JButton moreInfoButton = new JButton("View Info");
 				listConstraint = createCorrectGBC(0,0);
 				listConstraint.insets = new Insets(5,10,5,5);
+				
+				//If there is no label, then use the boring, default one I made
 				if(b.labels == null){
 					java.net.URL placeholderIcon = BrewniverseMainUI.class.getResource("images/default_label_icon.png");
 					beerPanel.add(new JLabel(b.name, new ImageIcon(placeholderIcon), JLabel.LEFT), listConstraint);
@@ -539,14 +610,15 @@ public class BrewniverseMainUI {
 					}
 				}
 				
-				java.net.URL removeSaveURL = BrewniverseMainUI.class.getResource("images/remove.png");
-				java.net.URL addSaveURL = BrewniverseMainUI.class.getResource("images/add.png");
+				//Create the toggleSaved button depending whether or not that beer is currently saved
 				JButton toggleSavedBeerButton;
 				if(isBeerSaved(b)){
+					java.net.URL removeSaveURL = BrewniverseMainUI.class.getResource("images/remove.png");
 					toggleSavedBeerButton = new JButton(new ImageIcon(removeSaveURL));
 					toggleSavedBeerButton.setToolTipText("Remove beer from saved list");
 				}
 				else{
+					java.net.URL addSaveURL = BrewniverseMainUI.class.getResource("images/add.png");
 					toggleSavedBeerButton = new JButton(new ImageIcon(addSaveURL));
 					toggleSavedBeerButton.setToolTipText("Add beer to saved list");
 				}
@@ -568,8 +640,9 @@ public class BrewniverseMainUI {
 						statusMessage("Currently Viewing: Saved Beers");
 					}
 				});
+				
 				listConstraint = createCorrectGBC(1,0);
-				listConstraint.anchor = listConstraint.EAST;
+				listConstraint.anchor = GridBagConstraints.EAST;
 				listConstraint.insets = new Insets(0,0,0,105);
 				beerPanel.add(toggleSavedBeerButton, listConstraint);
 				
@@ -584,6 +657,7 @@ public class BrewniverseMainUI {
 						beerCardLayout.show(rightCardPanes, BEERINFOPANEL);
 					}
 				});
+				
 				beerPanel.add(moreInfoButton, listConstraint);
 				beerPanel.setBorder(BorderFactory.createLineBorder(Color.black,1));
 				panelConstraint.gridy += 1;
@@ -592,7 +666,12 @@ public class BrewniverseMainUI {
 		}
 	}
 	
+	/*
+	 * This pane is used to display all available information about a given beer.  The
+	 * user can save the beer, or press the back button to get back to the beer list.
+	 */
 	public class BeerInfoPanel extends JPanel{
+		private static final long serialVersionUID = 1L;
 		private Beer beer;
 		private JPanel beerInfoMainPane;
 		private JScrollPane scrollPane;
@@ -614,15 +693,21 @@ public class BrewniverseMainUI {
 			this.add(scrollPane);
 		}
 		
+		//Once the beer is set, input all data into the information pane
 		public void setBeer(Beer newBeer){
 			GridBagConstraints c = new GridBagConstraints();
 			beer = newBeer;
 			beerInfoMainPane.removeAll();
 			
+			/*
+			 * Panes in the screen separated into top, middle, bottom. Top holds
+			 * the larger label image and the description text are.  Middle holds
+			 * all of the other granular data (IBUs, ABV, availability, color, style).
+			 * Bottom holds the save and back buttons.
+			 */
 			JPanel beerInfoTopPane = new JPanel();
 			beerInfoTopPane.setLayout(new GridBagLayout());
 			beerInfoTopPane.setBackground(COLORSCHEME4);
-			//beerInfoTopPane.setBorder(BorderFactory.createLineBorder(Color.black,1));
 			JPanel beerInfoMiddlePane = new JPanel();
 			beerInfoMiddlePane.setLayout(new BoxLayout(beerInfoMiddlePane, BoxLayout.Y_AXIS));
 			beerInfoMiddlePane.setBorder(BorderFactory.createTitledBorder(beer.name + " Characteristics"));
@@ -630,6 +715,7 @@ public class BrewniverseMainUI {
 			JPanel beerInfoBottomPane = new JPanel(new GridBagLayout());
 			beerInfoBottomPane.setBackground(COLORSCHEME4);
 			
+			//If a label for the beer exists, use it.  If not, use the boring one I made.
 			JLabel image = null;
 			if(beer.labels == null){
 				java.net.URL placeholderMedium = BrewniverseMainUI.class.getResource("images/default_label_medium.png");
@@ -661,6 +747,7 @@ public class BrewniverseMainUI {
 			c.gridx = 1; c.gridy = 0; c.gridheight = 1; c.gridwidth = 1; c.ipadx = 10; c.ipady = 20;
 			beerInfoTopPane.add(sp,c);
 			
+			//If these data values exist for the beer, then add them to the middle pane
 			if(beer.ibu != 0){
 				JLabel ibuLabel = new JLabel("<html><b>IBUs:</b> " + Float.toString(beer.ibu) + " (" + beer.getIBUDescription() + ")</html>");
 				ibuLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 0));
@@ -695,6 +782,7 @@ public class BrewniverseMainUI {
 				beerInfoMiddlePane.add(colorLabel,c);
 			}
 			
+			//Start adding buttons to the bottom pane
 			JButton beerInfoSaveButton = null;
 			if(isBeerSaved(beer)){
 				beerInfoSaveButton = new JButton("Remove from Saved Beers");
@@ -717,7 +805,7 @@ public class BrewniverseMainUI {
 					beerCardLayout.show(rightCardPanes, BEERLISTPANEL);
 				}
 			});
-			c.gridx = 0; c.gridy = 0; c.gridheight = 1; c.gridwidth = 1; c.ipadx = 5; c.ipady = 15; c.fill = c.NONE;
+			c.gridx = 0; c.gridy = 0; c.gridheight = 1; c.gridwidth = 1; c.ipadx = 5; c.ipady = 15; c.fill = GridBagConstraints.NONE;
 			beerInfoBottomPane.add(beerInfoSaveButton,c);
 			
 			JButton beerInfoBackButton = new JButton("Back");
@@ -727,16 +815,17 @@ public class BrewniverseMainUI {
 				}
 			});
 			
+			//Set final layout of beer info screen (lots of GridBagConstraint magic).
 			c.gridx = 1; c.gridy = 0; c.gridheight = 1; c.gridwidth = 1; c.ipadx = 5; c.ipady = 15;
 			beerInfoBottomPane.add(beerInfoBackButton,c);
 			
-			c.gridx = 0; c.gridy = 0; c.gridheight = 1; c.gridwidth = 1; c.ipadx = 5; c.ipady = 10; c.anchor = c.NORTH;
+			c.gridx = 0; c.gridy = 0; c.gridheight = 1; c.gridwidth = 1; c.ipadx = 5; c.ipady = 10; c.anchor = GridBagConstraints.NORTH;
 			beerInfoMainPane.add(name,c);
-			c.gridx = 0; c.gridy = 1; c.gridheight = 1; c.gridwidth = 1; c.ipadx = 5; c.ipady = 15; c.anchor = c.NORTHWEST;
+			c.gridx = 0; c.gridy = 1; c.gridheight = 1; c.gridwidth = 1; c.ipadx = 5; c.ipady = 15; c.anchor = GridBagConstraints.NORTHWEST;
 			beerInfoMainPane.add(beerInfoTopPane,c);
-			c.gridx = 0; c.gridy = 2; c.gridheight = 1; c.gridwidth = 1; c.ipadx = 5; c.ipady = 15; c.anchor = c.WEST; c.fill = c.HORIZONTAL;
+			c.gridx = 0; c.gridy = 2; c.gridheight = 1; c.gridwidth = 1; c.ipadx = 5; c.ipady = 15; c.anchor = GridBagConstraints.WEST; c.fill = GridBagConstraints.HORIZONTAL;
 			beerInfoMainPane.add(beerInfoMiddlePane,c);
-			c.gridx = 0; c.gridy = 3; c.gridheight = 1; c.gridwidth = 1; c.ipadx = 5; c.ipady = 15; c.anchor = c.SOUTHWEST; c.fill = c.NONE;
+			c.gridx = 0; c.gridy = 3; c.gridheight = 1; c.gridwidth = 1; c.ipadx = 5; c.ipady = 15; c.anchor = GridBagConstraints.SOUTHWEST; c.fill = GridBagConstraints.NONE;
 			beerInfoMainPane.add(beerInfoBottomPane,c);
 			System.out.println(beerInfoMiddlePane.getPreferredSize());
 		}
@@ -781,6 +870,7 @@ public class BrewniverseMainUI {
 		communicationPane.setVisible(false);
 	}
 	
+	//Method used to arrange images and buttons in the beer list elements
 	public GridBagConstraints createCorrectGBC(int x, int y) {
 	      GridBagConstraints gbc = new GridBagConstraints();
 	      gbc.gridx = x;
@@ -789,8 +879,6 @@ public class BrewniverseMainUI {
 	      gbc.gridheight = 1;
 
 	      gbc.anchor = (x == 0) ? GridBagConstraints.WEST : GridBagConstraints.EAST;
-	      //gbc.fill = (x == 0) ? GridBagConstraints.BOTH
-	      //      : GridBagConstraints.HORIZONTAL;
 
 	      gbc.insets = (x == 0) ? WEST_INSETS : EAST_INSETS;
 	      gbc.weightx = (x == 0) ? 0.1 : 1.0;
@@ -798,15 +886,16 @@ public class BrewniverseMainUI {
 	      return gbc;
 	}
 	
+	//When the window closes, make sure we export all the saved beers to a file
 	private WindowAdapter listener = new WindowAdapter() {
         @Override
         public void windowClosing(WindowEvent e) {
-            System.out.println("Exporting saved beers");
             brewApi.exportSavedBeers(savedBeers);
             System.exit(0);
         }
     };
 	
+    //The ALL POWERFUL MAIN
 	public static void main(String args[]){
 		frame = new JFrame("Brewniverse");
 		BrewniverseMainUI brewniverseMainUI = new BrewniverseMainUI();
